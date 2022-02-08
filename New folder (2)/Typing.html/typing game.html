@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/bbdccb4e58.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <style>
+        /* CSS */
+        body {
+            font-family: sans-serif;
+            height: 100vh;
+            margin: 0 auto;
+            text-align: center;
+            background-image: url(white.svg) ;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+        }
+
+        #score,
+        #time {
+            background: rgb(255, 255, 255);
+            padding: 7px, 15px, 8px, 15px;
+            margin-left: 5px;
+            border-bottom-right-radius: 10px;
+        }
+
+        h1 {
+            font-size: 28px;
+            padding: 10px;
+        }
+
+        textarea {
+            width: 30%;
+            padding: 10px;
+            height: 10%;
+        }
+
+        p,
+        form-control {
+            font-size: 20px;
+        }
+
+        .bar {
+            padding: 15px;
+            background: #03a9f4;
+            color: #ffffff;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        h3 {
+            font-size: 21px;
+            display: inline-block;
+            margin-top: 1px;
+            background: rgb(255, 245, 245);
+            padding: 7px 0px 7px 15px;
+            border-radius: 10px;
+            border-bottom-left-radius: 0px;
+            margin-right: 10px;
+        }
+
+        #tryAgain {
+            display: none;
+        }
+    </style>
+</head>
+<br>
+<div class="alert alert-warning" role="alert" style="font-size: 20px;">
+    <span id="timeInterval">Hello, Good Afternoon</span><button class="btn btn-outline-warning" id="show"
+        onclick="popUp()"> User</button>
+</div>
+<!-- HTML -->
+<br>
+
+<body oncontextmenu="return false">
+    <div class="bar">
+        <br>
+        <h1>Typing Game</h1>
+    </div>
+    <br>
+    <h3>
+        <span>Score</span>
+        <span id="score">0</span>
+        <span>Time</span>
+        <span id="time"></span>
+    </h3>
+    <p id="random"></p>
+    <p id="gamewin"></p>
+    <textarea onpaste= "return false" type="text" id="typedWord" placeholder="Type the above word"  spellcheck="true"></textarea>
+    <button class="btn btn-outline-primary mb-3" id="tryAgain">Try Again</button>
+
+</body>
+<!-- JS -->
+<script>
+    let showWord = document.querySelector("#random");
+    let typedWord = document.querySelector("#typedWord");
+    let tryAgain = document.querySelector("#tryAgain");
+    let url = "https://game-of-thrones-quotes.herokuapp.com/v1/random/5";
+    let randomWord = "";
+
+    getWord()
+    async function getWord() {
+        let response = await fetch(url);
+        let data = await response.json();
+        randomWord = data[0].sentence;
+        showWord.innerHTML = randomWord;
+    }
+    // score
+    typedWord.addEventListener("keyup", event => {
+        if (typedWord.value === randomWord){
+            getWord();
+            updateScore();
+            event.target.value = "";
+        } 
+    })
+
+    let score = 0;
+    let scoreValue = document.querySelector("#score");
+    function updateScore() {
+        score++;
+        scoreValue.innerHTML = score;
+        let number = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        let randomValue = Math.floor(Math.random() * number.length);
+        time += number[randomValue];
+        if (score >= 5) {
+            gameWin();
+        }
+    }
+
+    let time = 30;
+    // time
+    function updateTime() {
+        time--;
+        let displayTime = document.getElementById("time");
+        displayTime.innerHTML = time + "s";
+        if (time == 0) {
+            clearInterval(counter);
+            gameOver();
+        }
+    }
+    // game over
+    let counter = setInterval(updateTime, 1000);
+
+    function gameOver() {
+        showWord.innerHTML = "Time Run Out!!"
+        typedWord.style.display = "none";
+        tryAgain.style.display = "inline-block";
+    }
+
+    // tryAgain
+    tryAgain.addEventListener("click", () => {
+        window.location.reload();
+        tryAgain.style.display = "none";
+
+    });
+    // game win
+    let gamewin = document.querySelector("#gamewin");
+    function gameWin() {
+        clearInterval(counter);
+        showWord.style.display = "none";
+        random.style.display="none";
+        gamewin.innerHTML = "You won the game!!";
+        typedWord.style.display = "none";
+        tryAgain.style.display = "inline-block";
+    }
+
+    // JS DATE Object
+
+    let data = new Date();
+    let hours = data.getHours();
+    let timeInterval = document.getElementById("timeInterval");
+
+    if (hours >= 1 && hours <= 5) {
+        timeInterval.innerHTML = "Early Morning";
+    } else if (hours >= 6 && hours < 12) {
+        timeInterval.innerHTML = "Good Morning";
+    } else if (hours >= 12 && hours <= 14) {
+        timeInterval.innerHTML = "Good Afternoon";
+    } else if (hours >= 15 && hours <= 18) {
+        timeInterval.innerHTML = "Good Evening";
+    } else if (hours >= 19 && hours <= 24 || hours == 0) {
+        timeInterval.innerHTML = "Good Night ";
+    } else {
+        timeInterval.innerHTML = "Warmly Welcome to";
+    }
+    // Username
+    let showUser = document.querySelector("#show");
+    function popUp() {
+        let username = prompt("What is your name?");
+        localStorage.setItem("storedUser", username);
+        showUser.innerHTML = username;
+    }
+
+    let storedUser = localStorage.getItem("storedUser");
+    if (storedUser) {
+        showUser.innerHTML = storedUser;
+    } else {
+        showUser.innerHTML = "User";
+    }
+</script>
+
+</html>
